@@ -10,8 +10,6 @@ using System.Xml.Serialization;
 using NeuralNetwork;
 
 
-using Layer = System.Collections.Generic.List<NeuralNetwork.Neuron>;
-
 namespace NeuralNetwork
 {
     [Serializable]
@@ -31,13 +29,13 @@ namespace NeuralNetwork
             int numLayers = topology.Count;
             for (int layerNum = 0; layerNum < numLayers; layerNum++)
             {
-                Layers.Add(new());
+                Layers.Add(new(topology[(int)layerNum] + 1));
 
                 uint numOutputs = layerNum == topology.Count - 1 ? 0 : topology[layerNum + 1];
-
+                
                 for (uint neuronNum = 0; neuronNum <= topology[layerNum]; neuronNum++)
                 {
-                    Layers.Last().Add(new(numOutputs, neuronNum));
+                    Layers.Last().Add(new(numOutputs, neuronNum, Layers.Last()));
                 }
             }
         }
@@ -53,13 +51,13 @@ namespace NeuralNetwork
             int numLayers = topology.Count;
             for (int layerNum = 0; layerNum < numLayers; layerNum++)
             {
-                Layers.Add(new());
+                Layers.Add(new(topology[(int)layerNum] + 1));
 
                 uint numOutputs = layerNum == topology.Count - 1 ? 0 : topology[layerNum + 1];
 
                 for (uint neuronNum = 0; neuronNum <= topology[layerNum]; neuronNum++)
                 {
-                    Layers.Last().Add(new(numOutputs, neuronNum));
+                    Layers.Last().Add(new(numOutputs, neuronNum, Layers.Last()));
                 }
             }
         }
@@ -85,7 +83,7 @@ namespace NeuralNetwork
             }
         }
 
-        public void BackProp(List<double> targetValues)
+        public double BackProp(List<double> targetValues)
         {
               // Calculate overall net error (RMS of output neuron errors)
               Layer outputLayer = Layers.Last();
@@ -118,10 +116,11 @@ namespace NeuralNetwork
               {
                   Layer hiddenLayer = Layers[layerNum];
                   Layer nextLayer = Layers[layerNum + 1];
+                  Layer prevLayer = Layers[layerNum - 1];
 
                   for (int n = 0; n < hiddenLayer.Count; n++)
                   {
-                    hiddenLayer[n].CalculateHiddenGradients(nextLayer);
+                    hiddenLayer[n].CalculateHiddenGradients(nextLayer, prevLayer);
                   }
               }
 
@@ -138,6 +137,8 @@ namespace NeuralNetwork
                     layer[n].UpdateInputWeights(prevLayer);
                   }
               }
+
+            return error;
         }
 
         public void GetResults(List<double> resultValues)

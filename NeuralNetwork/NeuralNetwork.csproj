@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="xor-gate.training.data.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
